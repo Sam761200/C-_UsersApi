@@ -1,0 +1,127 @@
+# Tests de l'API Users avec DTOs
+# Utilise l'extension REST Client dans VS Code ou lance manuellement
+
+### 1. GET /api/users - Liste vide au départ
+GET http://localhost:5011/api/users
+Accept: application/json
+
+###
+
+### 2. POST /api/users - Créer un utilisateur
+POST http://localhost:5011/api/users
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+
+###
+
+### 3. GET /api/users - Liste avec un utilisateur
+GET http://localhost:5011/api/users
+Accept: application/json
+
+###
+
+### 4. GET /api/users/1 - Récupérer par ID
+GET http://localhost:5011/api/users/1
+Accept: application/json
+
+###
+
+### 5. PUT /api/users/1 - Mise à jour partielle (seulement l'email)
+PUT http://localhost:5011/api/users/1
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com"
+}
+
+###
+
+### 6. PUT /api/users/1 - Mise à jour complète
+PUT http://localhost:5011/api/users/1
+Content-Type: application/json
+
+{
+  "name": "Johnny Doe",
+  "email": "johnny@example.com"
+}
+
+###
+
+### 7. POST /api/users - Créer un deuxième utilisateur
+POST http://localhost:5011/api/users
+Content-Type: application/json
+
+{
+  "name": "Jane Smith",
+  "email": "jane@example.com"
+}
+
+###
+
+### 8. GET /api/users - Liste avec deux utilisateurs
+GET http://localhost:5011/api/users
+Accept: application/json
+
+###
+
+### 9. DELETE /api/users/1 - Supprimer le premier utilisateur
+DELETE http://localhost:5011/api/users/1
+
+###
+
+### 10. GET /api/users - Liste avec un seul utilisateur restant
+GET http://localhost:5011/api/users
+Accept: application/json
+
+###
+
+### 11. Tests d'erreurs - Email dupliqué
+POST http://localhost:5011/api/users
+Content-Type: application/json
+
+{
+  "name": "Duplicate User",
+  "email": "jane@example.com"
+}
+
+###
+
+### 12. Tests d'erreurs - Données invalides (nom trop court)
+POST http://localhost:5011/api/users
+Content-Type: application/json
+
+{
+  "name": "A",
+  "email": "invalid-email"
+}
+
+###
+
+### 13. Tests d'erreurs - ID inexistant
+GET http://localhost:5011/api/users/999
+Accept: application/json
+
+###
+
+### 14. Tests d'erreurs - Mise à jour sans données
+PUT http://localhost:5011/api/users/2
+Content-Type: application/json
+
+{}
+
+###
+
+### 15. DELETE /api/users/2 - Supprimer le dernier utilisateur
+DELETE http://localhost:5011/api/users/2
+
+###
+
+### 16. GET /api/users - Liste vide à la fin
+GET http://localhost:5011/api/users
+Accept: application/json
+
+###
