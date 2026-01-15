@@ -1,3 +1,4 @@
+using UsersApi.DTOs;
 using UsersApi.Models;
 
 namespace UsersApi.Services;
@@ -47,4 +48,34 @@ public interface IUserService
     /// <param name="id">ID de l'utilisateur à supprimer</param>
     /// <returns>True si supprimé, False s'il n'existait pas</returns>
     Task<bool> DeleteUserAsync(int id);
+
+    /// <summary>
+    /// Authentifie un utilisateur
+    /// </summary>
+    /// <param name="email">Email de l'utilisateur</param>
+    /// <param name="password">Mot de passe en clair</param>
+    /// <returns>L'utilisateur authentifié ou null</returns>
+    Task<User?> AuthenticateAsync(string email, string password);
+
+    /// <summary>
+    /// Enregistre un nouvel utilisateur
+    /// </summary>
+    /// <param name="registerDto">Données d'inscription</param>
+    /// <returns>L'utilisateur créé</returns>
+    /// <exception cref="ArgumentException">Si les données sont invalides</exception>
+    /// <exception cref="InvalidOperationException">Si l'email existe déjà</exception>
+    Task<User> RegisterUserAsync(RegisterDto registerDto);
+
+    /// <summary>
+    /// Récupère un utilisateur par son email
+    /// </summary>
+    /// <param name="email">Email de l'utilisateur</param>
+    /// <returns>L'utilisateur ou null</returns>
+    Task<User?> GetUserByEmailAsync(string email);
+
+    /// <summary>
+    /// Met à jour la dernière connexion d'un utilisateur
+    /// </summary>
+    /// <param name="userId">ID de l'utilisateur</param>
+    Task UpdateLastLoginAsync(int userId);
 }

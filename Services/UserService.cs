@@ -1,4 +1,6 @@
 using System.Text.RegularExpressions;
+using BCrypt.Net;
+using UsersApi.DTOs;
 using UsersApi.Models;
 using UsersApi.Repositories;
 
@@ -165,5 +167,79 @@ public class UserService : IUserService
         var emailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase);
         if (!emailRegex.IsMatch(email.Trim()))
             throw new ArgumentException("Le format de l'email est invalide", nameof(email));
+    }
+
+    /// <inheritdoc />
+    public async Task<User?> AuthenticateAsync(string email, string password)
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            return null;
+
+        var user = await _userRepository.GetByEmailAsync(email.Trim().ToLower());
+        if (user == null || !user.IsActive)
+            return null;
+
+        // Vérifier le mot de passe
+        if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            return null;
+
+        // Mettre à jour la dernière connexion
+        await UpdateLastLoginAsync(user.Id);
+
+        return user;
+    }
+
+    /// <inheritdoc />
+    public async Task<User> RegisterUserAsync(RegisterDto registerDto)
+    {
+        // Validation des données
+        if (registerDto == null)
+            throw new ArgumentNullException(nameof(registerDto));
+
+        ValidateName(registerDto.Name);
+        ValidateEmail(registerDto.Email);
+
+        if (registerDto.Password != registerDto.ConfirmPassword)
+            throw new ArgumentException("Les mots de passe ne correspondent pas");
+
+        // Vérifier si l'email existe déjà
+        var existingUser = await _userRepository.GetByEmailAsync(registerDto.Email.Trim().ToLower());
+        if (existingUser != null)
+            throw new InvalidOperationException("Un utilisateur avec cet email existe déjà");
+
+        // Créer le nouvel utilisateur
+        var user = new User
+        {
+            Name = registerDto.Name.Trim(),
+            Email = registerDto.Email.Trim().ToLower(),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
+            Role = "User",
+            IsActive = true
+        };
+
+        await _userRepository.AddAsync(user);
+        await _userRepository.SaveChangesAsync();
+        return user;
+    }
+
+    /// <inheritdoc />
+    public async Task<User?> GetUserByEmailAsync(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return null;
+
+        return await _userRepository.GetByEmailAsync(email.Trim().ToLower());
+    }
+
+    /// <inheritdoc />
+    public async Task UpdateLastLoginAsync(int userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user != null)
+        {
+            user.LastLoginAt = DateTime.UtcNow;
+            await _userRepository.UpdateAsync(user);
+            await _userRepository.SaveChangesAsync();
+        }
     }
 }
